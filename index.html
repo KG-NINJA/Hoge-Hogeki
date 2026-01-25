@@ -1,121 +1,114 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hogeki Artillery</title>
-<style>
-body {
-  margin: 0;
-  background: #0f132b;
-  color: #fff;
-  font-family: system-ui, sans-serif;
-}
-canvas { display:block; }
-#share {
-  position: fixed;
-  bottom: 16px;
-  left: 16px;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
-  padding: 12px 16px;
-  border-radius: 12px;
-}
-button {
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: none;
-  background: linear-gradient(135deg,#00d2ff,#00ffa7);
-  font-weight: bold;
-  cursor: pointer;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hogeki Artillery</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, sans-serif;
+      --player1:#00d2ff;
+      --player2:#ff007f;
+    }
+    body{margin:0;background:#0f132b;color:#fff;overflow:hidden}
+    canvas{display:block}
+    .hud{position:fixed;inset:1rem;pointer-events:none}
+    .card{background:rgba(255,255,255,.08);padding:1rem;border-radius:1rem;pointer-events:auto}
+    .cta{padding:.6rem 1rem;border-radius:999px;border:none;font-weight:700;cursor:pointer}
+  </style>
 </head>
 
 <body>
 <canvas id="game"></canvas>
 
-<div id="share">
-  <div id="shareText">勝利するとツイートできます</div>
-  <button id="tweetBtn" disabled>Tweet</button>
+<div class="hud" style="bottom:1rem;top:auto">
+  <div class="card">
+    <div id="shareStatus">Win a round to share.</div>
+    <button class="cta" id="tweetBtn" disabled>Tweet Result</button>
+  </div>
 </div>
 
 <script>
 /* ===============================
-   基本ゲーム最小構成（簡略版）
+   ゲーム本体（元のまま）
 ================================ */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
+const gravity = 0.25;
 let shots = 0;
-let winner = null;
 
-/* 仮の勝利トリガー（Spaceで即勝利） */
-window.addEventListener("keydown", e => {
-  if (e.key === " ") {
+const players = [
+  { name:"Player", x:100, y:300, color:"#00d2ff" },
+  { name:"CPU", x:canvas.width-100, y:300, color:"#ff007f" }
+];
+
+const state = {
+  winner:null
+};
+
+/* 仮：Spaceで勝敗決定（元ロジックがあるなら不要） */
+window.addEventListener("keydown", e=>{
+  if(e.key===" " && !state.winner){
     shots++;
-    if (!winner) {
-      winner = Math.random() > 0.5 ? "Player" : "CPU";
-      onWin();
-    }
+    state.winner = Math.random()>0.5?"Player":"CPU";
+    onWin();
   }
 });
 
-function draw() {
-  ctx.fillStyle = "#0f132b";
+function draw(){
+  ctx.fillStyle="#0f132b";
   ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle = "#fff";
-  ctx.fillText("Press SPACE to finish a match", 40, 60);
+
+  players.forEach(p=>{
+    ctx.fillStyle=p.color;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,20,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle="#fff";
+  ctx.fillText("Press SPACE to simulate win",20,30);
+
   requestAnimationFrame(draw);
 }
 draw();
 
 /* ===============================
-   ★ Codex想定：日本語ツイート生成
+   ★ 追加：日本語ツイート生成（Codex差替点）
 ================================ */
-
-/*
-  🔹 ここが最重要ポイント
-  後でこの関数を Codex / CLI / API に差し替える
-*/
 function generateJapaneseTweet({ winner, turns }) {
-
-  const templatesPlayer = [
-    `今回は${turns}ターンで勝利。\nCPUが学習する砲撃ゲーム、まだ油断できない。\n#KGNINJA`,
-    `${turns}ターンでなんとか勝てた。\n撃つたびに賢くなるCPUが相手。\n#KGNINJA`,
-    `学習するCPU相手に${turns}ターンで勝利。\n次はどうなるかわからない。\n#KGNINJA`
-  ];
-
-  const templatesCPU = [
-    `${turns}ターンでやられた。\nCPUがちゃんと学習してくるのが悔しい。\n#KGNINJA`,
-    `今回はCPUの勝ち。\n記憶する砲撃AI、侮れない。\n#KGNINJA`
-  ];
-
-  const pool = winner === "Player" ? templatesPlayer : templatesCPU;
-  return pool[Math.floor(Math.random() * pool.length)];
+  if (winner === "Player") {
+    return `${turns}ターンでなんとか勝利。\n撃つたびに学習するCPU、次は油断できない。\n#KGNINJA`;
+  } else {
+    return `${turns}ターンで敗北。\nCPUがちゃんと記憶してきた。\n#KGNINJA`;
+  }
 }
 
 /* ===============================
-   勝利時処理
+   勝利時処理（最小修正）
 ================================ */
-function onWin() {
+function onWin(){
   const tweetText = generateJapaneseTweet({
-    winner,
+    winner: state.winner,
     turns: shots
   });
 
-  const url = "https://kg-ninja.github.io/Hoge-Hogeki/";
+  const baseUrl = "https://kg-ninja.github.io/Hoge-Hogeki/";
   const intent =
     "https://twitter.com/intent/tweet?" +
     "text=" + encodeURIComponent(tweetText) +
-    "&url=" + encodeURIComponent(url);
+    "&url=" + encodeURIComponent(baseUrl);
 
-  document.getElementById("shareText").textContent = tweetText;
+  document.getElementById("shareStatus").textContent =
+    `Turns: ${shots} · Ready to tweet`;
+
   const btn = document.getElementById("tweetBtn");
   btn.disabled = false;
-  btn.onclick = () => window.open(intent, "_blank");
+  btn.onclick = ()=>window.open(intent,"_blank");
 }
 </script>
 </body>

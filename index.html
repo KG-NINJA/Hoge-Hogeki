@@ -216,7 +216,7 @@
   <div class="hud-row" style="position: fixed; bottom: 1rem; left: 1rem; right: 1rem; z-index: 12; gap: 1rem;">
     <div class="card" style="max-width: 420px;">
       <h2>Share</h2>
-      <div class="stat-value" id="shareStatus">Win a round to share.</div>
+      <div class="stat-value" id="shareStatus">Share anytime.</div>
       <a class="cta" id="tweetBtn" href="#" target="_blank" rel="noopener noreferrer">Tweet Result</a>
     </div>
   </div>
@@ -398,7 +398,7 @@
       state.particles = [];
       state.cpuMemory = [];
       state.shots = 0;
-      shareStatus.textContent = 'Win a round to share.';
+      shareStatus.textContent = 'Share anytime.';
       tweetBtn.href = '#';
       generateTerrain();
       positionPlayers();
@@ -848,17 +848,20 @@
       playerStatus.textContent = `Angle ${angleDeg}° · Power ${powerSlider.value}%`;
       turnLabel.textContent = state.current === 0 ? 'Player' : 'CPU';
       fireBtn.disabled = state.current !== 0 || !!state.projectile || !!state.winner;
-      if (!state.winner) updateShare();
+      updateShare();
     }
 
     function updateShare() {
-      if (!state.winner) return;
-      const turnCount = state.shots;
       const baseUrl = 'https://kg-ninja.github.io/Hoge-Hogeki/';
-      const text = `${state.winner} wins in ${turnCount} turns!`;
+      const turnCount = state.shots;
+      const text = state.winner
+        ? `${state.winner} wins in ${turnCount} turns!`
+        : `やればやるほどCPUがあなたを狙い撃ち？ ${turnCount}ターン経過。`;
       const hashtags = 'KGNINJA,hogeki';
       const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(baseUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
-      shareStatus.textContent = `Turns: ${turnCount} · Ready to tweet.`;
+      shareStatus.textContent = state.winner
+        ? `Turns: ${turnCount} · Ready to tweet.`
+        : `Turns: ${turnCount} · Share now.`;
       tweetBtn.href = url;
     }
 

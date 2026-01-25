@@ -1,913 +1,122 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hogeki Artillery</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-      --bg-start: #0f132b;
-      --bg-end: #1a1a2e;
-      --glass: rgba(255, 255, 255, 0.08);
-      --border: rgba(255, 255, 255, 0.2);
-      --blur: 20px;
-      --player1: #00d2ff;
-      --player2: #ff007f;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at 20% 20%, rgba(0, 210, 255, 0.2), transparent 45%),
-        radial-gradient(circle at 80% 0%, rgba(255, 0, 127, 0.2), transparent 50%),
-        linear-gradient(160deg, var(--bg-start), var(--bg-end));
-      overflow: hidden;
-      color: #f5f6ff;
-    }
-
-    #game {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .hud {
-      position: fixed;
-      inset: 1rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .hud-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .card {
-      min-width: 220px;
-      flex: 1;
-      padding: 1rem 1.25rem;
-      border-radius: 1rem;
-      background: var(--glass);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(var(--blur));
-      pointer-events: auto;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-    }
-
-    .card h2 {
-      margin: 0 0 0.35rem;
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .slider {
-      width: 100%;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 16px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.1);
-      outline: none;
-      overflow: hidden;
-    }
-
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--player1), #ffffff);
-      border: 3px solid rgba(0, 0, 0, 0.4);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
-      cursor: pointer;
-    }
-
-    .slider::-moz-range-thumb {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--player1), #ffffff);
-      border: 3px solid rgba(0, 0, 0, 0.4);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
-      cursor: pointer;
-    }
-
-    .cta {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      padding: 0.85rem;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, var(--player1), #00ffa7);
-      color: #051521;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 20px 40px rgba(0, 210, 255, 0.35);
-    }
-
-    .cta:active {
-      transform: translateY(2px);
-      box-shadow: 0 10px 20px rgba(0, 210, 255, 0.4);
-    }
-
-    .cta:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-      box-shadow: none;
-    }
-
-    .winner-banner {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(10, 10, 30, 0.7);
-      backdrop-filter: blur(6px);
-      color: #fff;
-      font-size: clamp(2rem, 5vw, 4rem);
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      z-index: 50;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-
-    .winner-banner.visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    @media (max-width: 768px) {
-      .hud {
-        inset: 0.5rem;
-      }
-
-      .card {
-        min-width: calc(50% - 0.5rem);
-      }
-
-      .cta {
-        font-size: 0.9rem;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hogeki Artillery</title>
+<style>
+body {
+  margin: 0;
+  background: #0f132b;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+canvas { display:block; }
+#share {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+button {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg,#00d2ff,#00ffa7);
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
 </head>
+
 <body>
-  <canvas id="game"></canvas>
-  <div class="hud">
-    <div class="hud-row">
-      <div class="card" id="playerCard">
-        <h2>Player</h2>
-        <div class="stat-value" id="playerStatus">Angle 0° · Power 0%</div>
-        <div class="controls">
-          <label>Power</label>
-          <input type="range" min="30" max="140" value="80" id="powerSlider" class="slider" />
-          <button class="cta" id="fireBtn">Fire</button>
-          <small>Drag from the cannon or use arrow keys / Space.</small>
-        </div>
-      </div>
-      <div class="card" id="turnCard">
-        <h2>Turn</h2>
-        <div class="stat-value" id="turnLabel">Player</div>
-        <div>Tap & drag anywhere to preview the trajectory.</div>
-      </div>
-      <div class="card" id="cpuCard">
-        <h2>CPU</h2>
-        <div class="stat-value" id="cpuStatus">Thinking…</div>
-        <div>CPU adapts to past shots for smarter aim.</div>
-      </div>
-    </div>
-  </div>
-  <div class="winner-banner" id="winnerBanner"></div>
+<canvas id="game"></canvas>
 
-  <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
+<div id="share">
+  <div id="shareText">勝利するとツイートできます</div>
+  <button id="tweetBtn" disabled>Tweet</button>
+</div>
 
-    const terrainStep = 4;
-    const gravity = 0.25;
-    const terrain = {
-      heights: [],
-      indestructible: [],
-    };
+<script>
+/* ===============================
+   基本ゲーム最小構成（簡略版）
+================================ */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-    const players = [
-      {
-        name: 'Player',
-        color: getComputedStyle(document.documentElement).getPropertyValue('--player1').trim(),
-        facing: 1,
-        x: 0,
-        y: 0,
-        angle: -Math.PI / 4,
-      },
-      {
-        name: 'CPU',
-        color: getComputedStyle(document.documentElement).getPropertyValue('--player2').trim(),
-        facing: -1,
-        x: 0,
-        y: 0,
-        aimBias: 0,
-        angle: -Math.PI * 0.75,
-      },
-    ];
+let shots = 0;
+let winner = null;
 
-    const state = {
-      current: 0,
-      projectile: null,
-      particles: [],
-      explosions: [],
-      winner: null,
-      aim: {
-        active: false,
-        angle: -Math.PI / 4,
-        power: 80,
-        preview: [],
-      },
-      shake: 0,
-      keys: new Set(),
-      cpuMemory: [],
-    };
-
-    const powerSlider = document.getElementById('powerSlider');
-    const fireBtn = document.getElementById('fireBtn');
-    const playerStatus = document.getElementById('playerStatus');
-    const turnLabel = document.getElementById('turnLabel');
-    const cpuStatus = document.getElementById('cpuStatus');
-    const winnerBanner = document.getElementById('winnerBanner');
-    let audioCtx = null;
-    let lastAimSound = 0;
-
-    function ensureAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+/* 仮の勝利トリガー（Spaceで即勝利） */
+window.addEventListener("keydown", e => {
+  if (e.key === " ") {
+    shots++;
+    if (!winner) {
+      winner = Math.random() > 0.5 ? "Player" : "CPU";
+      onWin();
     }
+  }
+});
 
-    function resizeCanvas() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-      generateTerrain();
-      positionPlayers();
-    }
+function draw() {
+  ctx.fillStyle = "#0f132b";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Press SPACE to finish a match", 40, 60);
+  requestAnimationFrame(draw);
+}
+draw();
 
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-    });
+/* ===============================
+   ★ Codex想定：日本語ツイート生成
+================================ */
 
-    function generateTerrain() {
-      const points = Math.ceil(width / terrainStep) + 2;
-      terrain.heights = new Array(points).fill(0);
-      terrain.indestructible = new Array(points).fill(false);
-      const base = height * 0.6;
-      const amp1 = height * 0.18;
-      const amp2 = height * 0.12;
-      const phaseA = Math.random() * Math.PI * 2;
-      const phaseB = Math.random() * Math.PI * 2;
-      for (let i = 0; i < points; i++) {
-        const t = i / points;
-        const noise = Math.sin(t * Math.PI * 2 + phaseA) * amp1 + Math.sin(t * Math.PI * 4 + phaseB) * amp2;
-        const jitter = (Math.random() - 0.5) * height * 0.08;
-        const slope = (Math.sin(t * Math.PI) - 0.5) * height * 0.08;
-        let y = base + noise + jitter + slope;
-        y = Math.min(height * 0.9, Math.max(height * 0.3, y));
-        terrain.heights[i] = y;
-      }
-      // plant indestructible shards
-      const shardCount = Math.max(2, Math.floor(width / 400));
-      for (let s = 0; s < shardCount; s++) {
-        const center = Math.floor(Math.random() * points);
-        const radius = Math.floor(6 + Math.random() * 14);
-        for (let j = -radius; j <= radius; j++) {
-          const idx = center + j;
-          if (idx >= 0 && idx < points) {
-            terrain.indestructible[idx] = true;
-            terrain.heights[idx] -= Math.abs(j) * 0.5; // sharper shards
-          }
-        }
-      }
-    }
+/*
+  🔹 ここが最重要ポイント
+  後でこの関数を Codex / CLI / API に差し替える
+*/
+function generateJapaneseTweet({ winner, turns }) {
 
-    function getTerrainHeight(x) {
-      const idx = x / terrainStep;
-      const i = Math.floor(idx);
-      const t = idx - i;
-      const safeIndex = (k) => Math.max(0, Math.min(terrain.heights.length - 1, k));
-      const h0 = terrain.heights[safeIndex(i)];
-      const h1 = terrain.heights[safeIndex(i + 1)];
-      return h0 + (h1 - h0) * t;
-    }
+  const templatesPlayer = [
+    `今回は${turns}ターンで勝利。\nCPUが学習する砲撃ゲーム、まだ油断できない。\n#KGNINJA`,
+    `${turns}ターンでなんとか勝てた。\n撃つたびに賢くなるCPUが相手。\n#KGNINJA`,
+    `学習するCPU相手に${turns}ターンで勝利。\n次はどうなるかわからない。\n#KGNINJA`
+  ];
 
-    function isIndestructible(x) {
-      const idx = Math.round(x / terrainStep);
-      const safe = Math.max(0, Math.min(terrain.indestructible.length - 1, idx));
-      return terrain.indestructible[safe];
-    }
+  const templatesCPU = [
+    `${turns}ターンでやられた。\nCPUがちゃんと学習してくるのが悔しい。\n#KGNINJA`,
+    `今回はCPUの勝ち。\n記憶する砲撃AI、侮れない。\n#KGNINJA`
+  ];
 
-    function deformTerrain(x, y, radius) {
-      for (let i = -radius; i <= radius; i++) {
-        const worldX = x + i;
-        if (worldX < 0 || worldX >= width) continue;
-        const idx = Math.round(worldX / terrainStep);
-        if (idx < 0 || idx >= terrain.heights.length) continue;
-        if (terrain.indestructible[idx]) continue;
-        const dist = Math.abs(i);
-        if (dist > radius) continue;
-        const crater = Math.sqrt(radius * radius - dist * dist);
-        const circleY = y + crater;
-        terrain.heights[idx] = Math.max(terrain.heights[idx], circleY);
-        terrain.heights[idx] = Math.min(height, Math.max(0, terrain.heights[idx]));
-      }
-    }
+  const pool = winner === "Player" ? templatesPlayer : templatesCPU;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
-    function positionPlayers() {
-      const leftX = width * 0.12;
-      const rightX = width * 0.88;
-      players[0].x = leftX;
-      players[0].y = getTerrainHeight(leftX) - 30;
-      players[1].x = rightX;
-      players[1].y = getTerrainHeight(rightX) - 30;
-    }
+/* ===============================
+   勝利時処理
+================================ */
+function onWin() {
+  const tweetText = generateJapaneseTweet({
+    winner,
+    turns: shots
+  });
 
-    function setWinner(name, color) {
-      state.winner = name;
-      winnerBanner.textContent = `${name} Wins!`;
-      winnerBanner.style.color = color;
-      winnerBanner.classList.add('visible');
-    }
+  const url = "https://kg-ninja.github.io/Hoge-Hogeki/";
+  const intent =
+    "https://twitter.com/intent/tweet?" +
+    "text=" + encodeURIComponent(tweetText) +
+    "&url=" + encodeURIComponent(url);
 
-    function resetGame() {
-      winnerBanner.classList.remove('visible');
-      state.winner = null;
-      state.current = 0;
-      state.projectile = null;
-      state.particles = [];
-      state.cpuMemory = [];
-      generateTerrain();
-      positionPlayers();
-    }
-
-    fireBtn.addEventListener('click', () => {
-      if (state.current !== 0 || state.projectile || state.winner) return;
-      ensureAudio();
-      launchFromInputs();
-    });
-
-    function launchFromInputs() {
-      const player = players[0];
-      const angle = state.aim.angle;
-      const power = parseFloat(powerSlider.value);
-      launchProjectile(player, angle, power);
-    }
-
-    canvas.addEventListener('pointerdown', (e) => {
-      if (state.winner) return;
-      ensureAudio();
-      const player = players[state.current];
-      if (state.current !== 0 || state.projectile) return;
-      ensureAudio();
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      state.aim.active = true;
-      state.aim.start = { x: player.x, y: player.y };
-      updateAim(x, y);
-    });
-
-    canvas.addEventListener('pointermove', (e) => {
-      if (!state.aim.active) return;
-      const rect = canvas.getBoundingClientRect();
-      updateAim(e.clientX - rect.left, e.clientY - rect.top);
-    });
-
-    canvas.addEventListener('pointerup', () => {
-      if (!state.aim.active) return;
-      state.aim.active = false;
-      if (state.current === 0 && !state.projectile && !state.winner) {
-        const player = players[0];
-        const derivedPower = Math.min(140, Math.max(35, state.aim.previewPower));
-        powerSlider.value = derivedPower.toFixed(0);
-        launchProjectile(player, state.aim.angle, derivedPower);
-      }
-    });
-
-    canvas.addEventListener('pointerleave', () => {
-      state.aim.active = false;
-    });
-
-    function updateAim(targetX, targetY) {
-      const player = players[state.current];
-      const dx = targetX - player.x;
-      const dy = targetY - player.y;
-      const angle = Math.atan2(dy, dx);
-      const clampedAngle = Math.max(-Math.PI + 0.2, Math.min(-0.2, angle));
-      state.aim.angle = state.current === 0 ? clampedAngle : angle;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      state.aim.previewPower = dist * 0.3;
-      state.aim.power = state.aim.previewPower;
-      state.aim.preview = computeTrajectory(player.x, player.y, state.aim.angle, Math.min(140, Math.max(30, state.aim.previewPower)));
-      playAimSound();
-      updateUI();
-    }
-
-    window.addEventListener('keydown', (e) => {
-      state.keys.add(e.key);
-      if (state.winner) return;
-      if (state.current === 0) {
-        ensureAudio();
-        if (e.key === ' ') {
-          e.preventDefault();
-          if (!state.projectile) launchFromInputs();
-        }
-        if (e.key === 'ArrowUp') {
-          state.aim.angle -= 0.05;
-        }
-        if (e.key === 'ArrowDown') {
-          state.aim.angle += 0.05;
-        }
-        if (e.key === 'ArrowLeft') {
-          powerSlider.value = Math.max(powerSlider.min, powerSlider.value - 2);
-        }
-        if (e.key === 'ArrowRight') {
-          powerSlider.value = Math.min(powerSlider.max, parseFloat(powerSlider.value) + 2);
-        }
-        state.aim.preview = computeTrajectory(players[0].x, players[0].y, state.aim.angle, parseFloat(powerSlider.value));
-      }
-      updateUI();
-    });
-
-    window.addEventListener('keyup', (e) => {
-      state.keys.delete(e.key);
-    });
-
-    function computeTrajectory(x, y, angle, power) {
-      const path = [];
-      const speed = power * 0.6;
-      let vx = Math.cos(angle) * speed;
-      let vy = Math.sin(angle) * speed;
-      let px = x;
-      let py = y;
-      for (let i = 0; i < 120; i++) {
-        vx *= 0.999;
-        vy += gravity * 0.6;
-        px += vx * 0.016;
-        py += vy * 0.016;
-        if (py > getTerrainHeight(px)) break;
-        path.push({ x: px, y: py });
-      }
-      return path;
-    }
-
-    function launchProjectile(player, angle, power) {
-      const speed = power * 0.6;
-      player.angle = angle;
-      playFireSound();
-      state.projectile = {
-        owner: state.current,
-        x: player.x,
-        y: player.y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        trail: 0,
-      };
-      state.aim.preview = [];
-      state.aim.active = false;
-      fireBtn.disabled = true;
-      updateUI();
-    }
-
-    function updateProjectile(dt) {
-      if (!state.projectile) return;
-      const p = state.projectile;
-      p.vy += gravity * dt * 0.06;
-      p.x += p.vx * dt * 0.06;
-      p.y += p.vy * dt * 0.06;
-      p.trail += dt;
-      if (p.trail > 16) {
-        spawnParticle(p.x, p.y, p.owner === 0 ? players[0].color : players[1].color, true);
-        p.trail = 0;
-      }
-      // screen bounds (allow off-screen arcs that can return)
-      if ((p.x < -200 && p.vx < 0) || (p.x > width + 200 && p.vx > 0) || p.y > height + 200) {
-        state.projectile = null;
-        nextTurn();
-        return;
-      }
-      // player collision
-      for (const [index, player] of players.entries()) {
-        const dx = p.x - player.x;
-        const dy = p.y - (player.y + 5);
-        if (Math.hypot(dx, dy) < 22) {
-          explode(p.x, p.y, index);
-          setWinner(state.projectile.owner === 0 ? 'Player' : 'CPU', players[state.projectile.owner].color);
-          state.projectile = null;
-          return;
-        }
-      }
-      const floor = getTerrainHeight(p.x);
-      if (p.y >= floor) {
-        explode(p.x, floor, null);
-        if (p.owner === 1 && !state.winner) {
-          recordCpuAdjustment(p.x, floor);
-        }
-        state.projectile = null;
-        nextTurn();
-      }
-    }
-
-    function explode(x, y, targetIndex) {
-      deformTerrain(x, y, 80);
-      state.shake = 16;
-      playExplosionSound();
-      state.explosions.push({ x, y, life: 30, radius: 0 });
-      for (let i = 0; i < 50; i++) {
-        spawnParticle(x, y, targetIndex === 0 ? players[1].color : players[0].color, false);
-      }
-    }
-
-    function recordCpuAdjustment(impactX, impactY) {
-      const target = players[0];
-      const errorX = target.x - impactX;
-      const errorY = target.y - impactY;
-      const powerAdjust = Math.max(-25, Math.min(25, errorX * 0.06));
-      const angleAdjust = Math.max(-0.12, Math.min(0.12, errorY * -0.0008));
-      state.cpuMemory.push({ angle: angleAdjust, power: powerAdjust });
-      if (state.cpuMemory.length > 3) state.cpuMemory.shift();
-    }
-
-    function spawnParticle(x, y, color, trail) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = (trail ? Math.random() * 20 : 20 + Math.random() * 60) * (trail ? 0.5 : 1);
-      state.particles.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        life: trail ? 20 + Math.random() * 20 : 40 + Math.random() * 20,
-        color,
-        trail,
-      });
-    }
-
-    function updateParticles(dt) {
-      const drag = 0.98;
-      for (let i = state.particles.length - 1; i >= 0; i--) {
-        const part = state.particles[i];
-        part.vy += gravity * (part.trail ? 0.02 : 0.05);
-        part.x += part.vx * dt * 0.02;
-        part.y += part.vy * dt * 0.02;
-        part.vx *= drag;
-        part.vy *= drag;
-        part.life -= dt * 0.4;
-        if (part.life <= 0) {
-          state.particles.splice(i, 1);
-        }
-      }
-    }
-
-    function updateExplosions(dt) {
-      for (let i = state.explosions.length - 1; i >= 0; i--) {
-        const blast = state.explosions[i];
-        blast.life -= dt * 0.4;
-        blast.radius += dt * 0.6;
-        if (blast.life <= 0) {
-          state.explosions.splice(i, 1);
-        }
-      }
-    }
-
-    function drawBackground() {
-      const gradient = ctx.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, '#0d0b1a');
-      gradient.addColorStop(1, '#1b1e3c');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-      ctx.save();
-      ctx.globalAlpha = 0.25;
-      ctx.fillStyle = '#ffffff';
-      for (let i = 0; i < 80; i++) {
-        ctx.fillRect(Math.random() * width, Math.random() * height * 0.5, 1, 1);
-      }
-      ctx.restore();
-    }
-
-    function drawTerrain() {
-      ctx.beginPath();
-      ctx.moveTo(0, height);
-      for (let i = 0; i < terrain.heights.length; i++) {
-        ctx.lineTo(i * terrainStep, terrain.heights[i]);
-      }
-      ctx.lineTo(width, height);
-      ctx.closePath();
-      const terrainGradient = ctx.createLinearGradient(0, height * 0.4, 0, height);
-      terrainGradient.addColorStop(0, '#1f2a44');
-      terrainGradient.addColorStop(1, '#0c0f1f');
-      ctx.fillStyle = terrainGradient;
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // indestructible shards highlight
-      ctx.save();
-      ctx.globalAlpha = 0.3;
-      ctx.fillStyle = '#7fffd4';
-      for (let i = 0; i < terrain.indestructible.length; i++) {
-        if (terrain.indestructible[i]) {
-          const x = i * terrainStep;
-          ctx.fillRect(x - 1, terrain.heights[i] - 30, 2, 30);
-        }
-      }
-      ctx.restore();
-    }
-
-    function drawPlayers() {
-      for (const player of players) {
-        ctx.save();
-        ctx.translate(player.x, player.y);
-        const useAngle = player === players[state.current] && state.current === 0 && !state.projectile
-          ? state.aim.angle
-          : player.angle;
-        const barrelLength = 28;
-        // turret barrel
-        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-        ctx.lineWidth = 6;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(0, -18);
-        ctx.lineTo(Math.cos(useAngle) * barrelLength, Math.sin(useAngle) * barrelLength - 18);
-        ctx.stroke();
-        // turret base
-        ctx.fillStyle = player.color;
-        ctx.shadowColor = player.color;
-        ctx.shadowBlur = 20;
-        ctx.beginPath();
-        ctx.roundRect(-20, -18, 40, 18, 6);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(0, -22, 10, 0, Math.PI * 2);
-        ctx.fill();
-        // bunker body
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'rgba(20, 28, 45, 0.85)';
-        ctx.beginPath();
-        ctx.roundRect(-32, -2, 64, 26, 10);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-        ctx.stroke();
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    function playFireSound() {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
-      const data = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < data.length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
-      }
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = noiseBuffer;
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'highpass';
-      filter.frequency.value = 800;
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.6, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-      noise.connect(filter).connect(gain).connect(audioCtx.destination);
-      noise.start(now);
-    }
-
-    function playExplosionSound() {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(140, now);
-      osc.frequency.exponentialRampToValueAtTime(50, now + 0.4);
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.7, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 700;
-      osc.connect(filter).connect(gain).connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.5);
-    }
-
-    function playAimSound() {
-      if (!audioCtx) return;
-      const nowMs = performance.now();
-      if (nowMs - lastAimSound < 120) return;
-      lastAimSound = nowMs;
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(880, now);
-      osc.frequency.exponentialRampToValueAtTime(660, now + 0.08);
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 0.1);
-    }
-
-    function drawProjectile() {
-      if (!state.projectile) return;
-      ctx.save();
-      ctx.fillStyle = '#fff';
-      ctx.shadowColor = '#fff';
-      ctx.shadowBlur = 20;
-      ctx.beginPath();
-      ctx.arc(state.projectile.x, state.projectile.y, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawParticles() {
-      for (const part of state.particles) {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, part.life / 60);
-        const gradient = ctx.createRadialGradient(part.x, part.y, 0, part.x, part.y, part.trail ? 6 : 10);
-        gradient.addColorStop(0, part.color);
-        gradient.addColorStop(1, 'transparent');
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(part.x, part.y, part.trail ? 4 : 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    function drawExplosions() {
-      for (const blast of state.explosions) {
-        const alpha = Math.max(0, blast.life / 30);
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        const ring = ctx.createRadialGradient(blast.x, blast.y, 0, blast.x, blast.y, blast.radius);
-        ring.addColorStop(0, 'rgba(255,255,255,0.9)');
-        ring.addColorStop(0.4, 'rgba(255,128,0,0.8)');
-        ring.addColorStop(0.8, 'rgba(255,0,128,0.4)');
-        ring.addColorStop(1, 'rgba(255,0,128,0)');
-        ctx.fillStyle = ring;
-        ctx.beginPath();
-        ctx.arc(blast.x, blast.y, blast.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(blast.x, blast.y, blast.radius * 0.6, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    function drawAimGuide() {
-      if ((!state.aim.active && state.current !== 0) || state.projectile) return;
-      const player = players[state.current];
-      const preview = state.aim.preview;
-      if (!preview || preview.length === 0) return;
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 6]);
-      ctx.beginPath();
-      ctx.moveTo(player.x, player.y);
-      for (const point of preview) {
-        ctx.lineTo(point.x, point.y);
-      }
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function updateUI() {
-      const angleDeg = Math.abs((state.aim.angle * 180) / Math.PI).toFixed(1);
-      playerStatus.textContent = `Angle ${angleDeg}° · Power ${powerSlider.value}%`;
-      turnLabel.textContent = state.current === 0 ? 'Player' : 'CPU';
-      fireBtn.disabled = state.current !== 0 || !!state.projectile || !!state.winner;
-    }
-
-    function nextTurn() {
-      state.current = (state.current + 1) % players.length;
-      if (state.current === 1 && !state.winner) {
-        setTimeout(cpuFire, 600 + Math.random() * 600);
-      }
-      updateUI();
-    }
-
-    function cpuFire() {
-      if (state.projectile || state.winner) return;
-      const cpu = players[1];
-      const target = players[0];
-      const adjustment = state.cpuMemory.length
-        ? state.cpuMemory[state.cpuMemory.length - 1]
-        : { angle: 0, power: 0 };
-      const distance = target.x - cpu.x;
-      const heightDiff = cpu.y - target.y;
-      let guessAngle = Math.atan2(heightDiff, distance);
-      if (guessAngle > 0) guessAngle -= Math.PI * 2;
-      guessAngle += (Math.random() - 0.5) * 0.2 + adjustment.angle; // noise + correction
-      guessAngle = Math.max(-Math.PI + 0.2, Math.min(-0.2, guessAngle));
-      const g = gravity * 3.5;
-      const dist = Math.abs(distance);
-      let baseAngle = Math.abs(guessAngle);
-      if (baseAngle > Math.PI / 2) baseAngle = Math.PI - baseAngle;
-      let power = Math.sqrt((dist * g) / Math.sin(2 * baseAngle)) * 2.2;
-      if (!Number.isFinite(power)) power = 90;
-      power += (Math.random() - 0.5) * 12 + adjustment.power;
-      power = Math.max(40, Math.min(135, power));
-      state.aim.preview = computeTrajectory(cpu.x, cpu.y, guessAngle, power);
-      cpuStatus.textContent = `Angle ${(Math.abs((guessAngle * 180) / Math.PI)).toFixed(1)}° · Power ${power.toFixed(0)}%`;
-      launchProjectile(cpu, guessAngle, power);
-    }
-
-
-    function gameLoop(timestamp) {
-      if (!gameLoop.last) gameLoop.last = timestamp;
-      const dt = timestamp - gameLoop.last;
-      gameLoop.last = timestamp;
-
-      drawBackground();
-      ctx.save();
-      if (state.shake > 0) {
-        const x = (Math.random() - 0.5) * state.shake;
-        const y = (Math.random() - 0.5) * state.shake;
-        ctx.translate(x, y);
-        state.shake *= 0.9;
-      }
-      drawTerrain();
-      drawPlayers();
-      drawAimGuide();
-      drawProjectile();
-      drawExplosions();
-      drawParticles();
-      ctx.restore();
-
-      updateProjectile(dt);
-      updateParticles(dt);
-      updateExplosions(dt);
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    canvas.addEventListener('dblclick', () => {
-      if (!state.winner) return;
-      resetGame();
-    });
-
-    generateTerrain();
-    positionPlayers();
-    updateUI();
-    state.aim.preview = computeTrajectory(players[0].x, players[0].y, state.aim.angle, parseFloat(powerSlider.value));
-    requestAnimationFrame(gameLoop);
-  </script>
+  document.getElementById("shareText").textContent = tweetText;
+  const btn = document.getElementById("tweetBtn");
+  btn.disabled = false;
+  btn.onclick = () => window.open(intent, "_blank");
+}
+</script>
 </body>
 </html>
